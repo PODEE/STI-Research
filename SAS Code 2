@@ -1,0 +1,83 @@
+libname SASBA "/home/podeecodee0/DAVON OFFICE/SASBA";
+
+/*Using a SAS Array to Convert Likert Scale to Scores*/
+
+data sasba.stiscores(drop=i);
+set sasba.sti2;
+
+/*Severity scores calc*/
+ARRAY Section3a{*} Q31_1 Q31_2 Q31_3;
+ARRAY Score3a{*} Q3_S1 Q31_S2 Q31_S3;
+do i=1 to dim(Section3a);
+if Section3a{i} = "Strongly Disagree" then Score3a{i} = 100;
+else if Section3a{i} = "Somewhat Disagree" then Score3a{i} = 75;
+else if Section3a{i} = "Somewhat Agree" then Score3a{i} = 50;
+else if Section3a{i} = "Strongly Agree" then Score3a{i} = 25;
+else Score3a{i} = .;
+end;
+format Severity_Score comma8.0;
+Severity_Score = mean(Q3_S1,Q31_S2,Q31_S3);
+
+/*Susceptibility scores calc*/
+ARRAY Section3b{*} Q31_4 Q31_5 Q31_6;
+ARRAY Score3b{*} Q31_S4 Q31_S5 Q31_S6;
+do i=1 to dim(Section3b);
+if Section3b{i} = "Strongly Disagree" then Score3b{i} = 25;
+else if Section3b{i} = "Somewhat Disagree" then Score3b{i} = 50;
+else if Section3b{i} = "Somewhat Agree" then Score3b{i} = 75;
+else if Section3b{i} = "Strongly Agree" then Score3b{i} = 100;
+else Score3b{i} = .;
+end;
+format Suscep_Score comma8.0;
+Suscep_Score = mean(Q31_S4,Q31_S5,Q31_S6);
+
+/*Benefits Score calc*/
+ARRAY Section4{*} Q35_1 Q35_2 Q35_3 Q35_5 Q35_6 Q35_7 Q35_8;
+ARRAY Score4{*} Q35_S1 Q35_S2 Q35_S3 Q35_S5 Q35_S6 Q35_S7 Q35_S8;
+do i=1 to dim(Section4);
+if Section4{i} = "Strongly Disagree" then Score4{i} = 25;
+else if Section4{i} = "Somewhat Disagree" then Score4{i} = 50;
+else if Section4{i} = "Somewhat Agree" then Score4{i} = 75;
+else if Section4{i} = "Strongly Agree" then Score4{i} = 100;
+else Score4{i} = .;
+end;
+/*exception Q35_4*/
+ARRAY Section4b{*} Q35_4;
+ARRAY Score4b{*} Q35_S4;
+do i=1 to dim(Section4b);
+if Section4b{i} = "Strongly Disagree" then Score4b{i} = 100;
+else if Section4b{i} = "Somewhat Disagree" then Score4b{i} = 75;
+else if Section4b{i} = "Somewhat Agree" then Score4b{i} = 50;
+else if Section4b{i} = "Strongly Agree" then Score4b{i} = 25;
+else Score4b{i} = .;
+end;
+format Benefits_Score comma8.0;
+Benefits_Score = mean(Q35_S1,Q35_S2,Q35_S3,Q35_S4,Q35_S5,Q35_S6,Q35_S7,Q35_S8);
+
+/*Barriers Score calc*/
+ARRAY Section5{*} Q39_1 Q39_2 Q39_3 Q39_4 Q39_6 Q39_7 Q39_8;
+ARRAY Score5{*} Q39_S1 Q39_S2 Q39_S3 Q39_S4 Q39_S6 Q39_S7 Q39_S8;
+do i=1 to dim(Section5);
+if Section5{i} = "Strongly Disagree" then Score5{i} = 25;
+else if Section5{i} = "Somewhat Disagree" then Score5{i} = 50;
+else if Section5{i} = "Somewhat Agree" then Score5{i} = 75;
+else if Section5{i} = "Strongly Agree" then Score5{i} = 100;
+else Score5{i} = .;
+end;
+/*exception Q39_5*/
+ARRAY Section5b{*} Q39_5;
+ARRAY Score5b{*} Q39_S5;
+do i=1 to dim(Section5b);
+if Section5b{i} = "Strongly Disagree" then Score5b{i} = 100;
+else if Section5b{i} = "Somewhat Disagree" then Score5b{i} = 75;
+else if Section5b{i} = "Somewhat Agree" then Score5b{i} = 50;
+else if Section5b{i} = "Strongly Agree" then Score5b{i} = 25;
+else Score5b{i} = .;
+end;
+format Barrier_Score comma8.0;
+Barrier_Score = mean(Q39_S1,Q39_S2,Q39_S3,Q39_S4,Q39_S5,Q39_S6,Q39_S7,Q39_S8);
+run;
+
+/*view contents of dataset*/
+proc contents data=sasba.stiscores varnum;
+run;
