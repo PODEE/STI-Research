@@ -1,0 +1,92 @@
+libname SASBA "/home/podeecodee0/DAVON OFFICE/SASBA";
+
+data SASBA.collapse(keep= Q9 Q10 Q20 Q22 NHW Q87 Residence Heterosexual Q60 RISKY Severity_Score 
+Suscep_Score Benefits_Score Barrier_Score AgeRange);
+set sasba.stiscores2;
+if Q17 = "White" then NHW = "Yes";
+else if Q17 = " " THEN NHW = " ";
+ELSE NHW = "No";
+
+if Q87 IN ("5th year or more undergraduate", "Graduate or professional", "Other") then Q87 = "Other";
+
+length Residence $12;
+if Q21 in ("College dormitory or residence hall", "Fraternity or sorority house", "Other university/ college housing") 
+then Residence = "On-Campus";
+else if Q21 in ("Off-campus house or apartment", "Partner/guardian/relative's house") then Residence = "Off-campus";
+else Residence = "";
+
+length Heterosexual $3;
+if Q14 = "" then Heterosexual = "";
+else if Q14 = "Straight/ Heterosexual" then Heterosexual = "Yes";
+else Heterosexual = "No";
+
+length AgeRange $8;
+if Q9 = . THEN AgeRange = "";
+else if Q9 <=21 THEN AgeRange="19-21";
+else AgeRange = "Over 21";
+run;
+
+/*chisq test of independence*/
+PROC FREQ DATA=SASBA.collapse;
+TABLES (Q10 Q20 Q22 NHW Q87 Residence Heterosexual Q60 AgeRange) * RISKY/chisq relrisk expected plots=freqplot(scale=percent);
+label 
+Q10 = 'Sex at Birth'
+Q87 = 'Year in school'
+Q20 = 'Marital status'
+Q22 = 'Do you identify with any sort of religion'
+Q60 = 'Received STI information'
+RISKY = 'Risky Sexual Behavior'
+NHW = 'Non-Hispanic White'
+;
+RUN;
+
+/*view summary stats on numeric variables*/
+proc means data=sasba.stiscores2 MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+title 'Overall Mean Scores';
+RUN;
+
+proc means data=SASBA.collapse MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+class RISKY;
+title 'Mean Scores classified by Risky Behavior';
+RUN;
+
+proc means data=SASBA.collapse MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+class Q60;
+title 'Mean Scores classified by whether they received STI information';
+RUN;
+
+proc means data=SASBA.collapse MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+class Residence;
+title 'Mean Scores classified by Residence';
+RUN;
+
+proc means data=SASBA.collapse MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+class Heterosexual;
+title 'Mean Scores classified by Sexual Oientation';
+RUN;
+
+proc UNIVARIATE data=sasba.stiscores2;
+var Q9;
+RUN;
+
+PROC SORT DATA=sasba.stiscores2 OUT=SORTSCORES;
+BY RISKY;
+RUN;
+
+proc means data=SORTSCORES MEAN MAXDEC=2;
+var Severity_Score Suscep_Score Benefits_Score Barrier_Score;
+BY RISKY;
+RUN;
+
+/*t-test for diff in mean scores*/
+proc ttest data=SASBA.collapse plots (only)=qq alpha=.05 h0=0;     
+class RISKY;
+var Severity_Score; 
+title 'Independent Samples t-test for Mean Differences with Q-Q Plots';
+run;
+
