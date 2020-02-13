@@ -1,0 +1,23 @@
+data scores(drop=i); 
+set sasba.sti2;
+
+ARRAY Section3{*} Q31_1 Q31_2 Q31_3 Q31_4 Q31_5 Q31_6;
+ARRAY Score3{*} Q3_S1 Q31_S2 Q31_S3 Q31_S4 Q31_S5 Q31_S6;
+
+do i=1 to dim(Section3);
+ if Section3{i} = "Strongly Disagree" then Score3{i} = 25;
+ else if Section3{i} = "Somewhat Disagree" then Score3{i} = 50;
+ else if Section3{i} = "Somewhat Agree" then Score3{i} = 75;
+ else if Section3{i} = "Strongly Agree" then Score3{i} = 100;
+ else Score3{i} = .;
+end;
+
+format Suscep_Score comma8.0;
+Suscep_Score = mean(Q3_S1,Q31_S2,Q31_S3,Q31_S4,Q31_S5,Q31_S6);
+
+/* Line4 of Code creates an Array Named Section3 - from data this is where actual responses are
+Line 5 of code creates a new array named Score - produces new variables for the numerical conversion of Likert scale points
+I do not define the specific dimensin of the array here, I allow SAS to determine that with the *
+
+Line 7 to 13, is a do-loop, it loops through it response and assigns a value based on the respondent's choice
+*/
